@@ -6,8 +6,8 @@ def repo():
     """Imports gemmlowp."""
 
     # Attention: tools parse and update these lines.
-    GEMMLOWP_COMMIT = "fda83bdc38b118cc6b56753bd540caa49e570745"
-    GEMMLOWP_SHA256 = "43146e6f56cb5218a8caaab6b5d1601a083f1f31c06ff474a4378a7d35be9cfb"
+    GEMMLOWP_COMMIT = "eeb8bc95c84ba05bc99ac692512597c6b994463f"
+    GEMMLOWP_SHA256 = "b03326fd0885b20106b17fd63d38d2a060cdfeef4c405dbf4c763030dca00b5b"
 
     tf_http_archive(
         name = "gemmlowp",
@@ -15,6 +15,6 @@ def repo():
         strip_prefix = "gemmlowp-{commit}".format(commit = GEMMLOWP_COMMIT),
         urls = [
             "https://storage.googleapis.com/mirror.tensorflow.org/github.com/google/gemmlowp/archive/{commit}.zip".format(commit = GEMMLOWP_COMMIT),
-            "https://github.com/google/gemmlowp/archive/{commit}.zip".format(commit = GEMMLOWP_COMMIT),
+            "https://github.com/vera121/gemmlowp/archive/{commit}.zip".format(commit = GEMMLOWP_COMMIT),
         ],
     )

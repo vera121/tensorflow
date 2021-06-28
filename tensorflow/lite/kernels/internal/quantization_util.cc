@@ -90,6 +90,81 @@ void QuantizeMultiplier(double double_multiplier, int32_t* quantized_multiplier,
   *quantized_multiplier = static_cast<int32_t>(q_fixed);
 }
 
+// <----SNPS EV rounding
+typedef double Scale_type;
+#include <stdlib.h>
+#include <stdint.h>
+#include <string.h>
+
+static void normalize_fractional(Scale_type F, unsigned &mpy, unsigned &shift) {
+    // Adapted from python code in evgencnn.
+    int frac_bits = 16;
+    Scale_type hi = 0.5;
+    int nudge_power = frac_bits;
+    // Due to symmetric rounding, >= 32767.5 rounds to 32768, which is invalid
+    // as a 16-bit signed number.
+    // So the high value should be shifted by 32767.49/32768 so rounding
+    // will produce at most 32767.  Nudge avoids that.
+    unsigned two_to_nudge = 1<<nudge_power;
+    hi *= (Scale_type(two_to_nudge)-0.51)/two_to_nudge;
+    Scale_type lo = hi/2;
+    int frac_adjust_shift = 0;
+    F = fabs(F);
+    Scale_type oldF = F;
+    while (F >= hi) {
+    frac_adjust_shift -= 1; F /= 2;
+    }
+    while (F < lo) {
+    frac_adjust_shift += 1; F *= 2;
+    }
+
+    int max_shift = 63;
+    while (frac_bits + frac_adjust_shift > max_shift) {
+    frac_adjust_shift--;
+    }
+    int total_shift = frac_bits + frac_adjust_shift;
+    // printf("F=%f fas=%d\n",F,frac_adjust_shift);
+    // printf("newF=%f\n",oldF*(1<<total_shift));
+    mpy = std::round(oldF * (1<<frac_bits) * (1<<frac_adjust_shift));
+    // Now if mpy is even, divide by 2 and reduce the shift.
+    shift = frac_bits + frac_adjust_shift;
+    const int MINSHIFT = 1;  // Not knowing whether HW likes shift of 0, we make min 1.
+    while ((mpy & 1) == 0 && shift > MINSHIFT) {
+        // The end result is an odd fractional.
+        mpy >>= 1; shift -= 1;
+    }
+}
+
+void EVQuantizeMultiplier(double double_multiplier, int32_t* quantized_multiplier,
+        int* shift)
+{
+    enum Rmode { R_tf_round, R_ev_round };
+    auto tell = []() {
+    const char* QR = getenv("TF_QUANTIZED_ROUND");
+    if (QR == 0) return R_tf_round;
+    return
+        strcmp(QR,"EV")==0?R_ev_round:R_tf_round;
+        // (printf("Unrecognized rounding mode %s\n",QR), R_tf_round);
+    };
+
+    static const Rmode QR = tell();
+    switch(QR) {
+        case R_tf_round: {
+            QuantizeMultiplier(double_multiplier, quantized_multiplier, shift);
+            // printf("TF round by %18.15f = mpy %d shift %d\n",double_multiplier, *quantized_multiplier, *shift);
+        } break;
+        case R_ev_round: {
+            unsigned mpy, ushift;
+            normalize_fractional(double_multiplier, mpy, ushift);
+            // printf("EV round by %18.15f = mpy %d shift %d\n",double_multiplier,mpy,ushift);
+            *quantized_multiplier = static_cast<int32_t>(mpy);
+            *shift = int(ushift);
+            // printf("q_mul=%d, q_shift=%d\n", *quantized_multiplier, *shift);
+        } break;
+    }
+}
+// SNPS EV rounding--->
+
 void QuantizeMultiplierGreaterThanOne(double double_multiplier,
                                       int32_t* quantized_multiplier,
                                       int* left_shift) {

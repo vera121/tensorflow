@@ -194,6 +194,8 @@ void QuantizeMultiplierGreaterThanOne(double double_multiplier,
 // left-shift (when the multiplier is >1)
 void QuantizeMultiplier(double double_multiplier, int32_t* quantized_multiplier,
                         int* shift);
+void EVQuantizeMultiplier(double double_multiplier, int32_t* quantized_multiplier,
+                        int* shift);
 
 // Splits a double input value into a returned fraction, and a shift value from
 // the exponent, using only bitwise and integer operations to support

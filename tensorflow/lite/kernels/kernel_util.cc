@@ -223,6 +223,7 @@ TfLiteStatus PopulateConvolutionQuantizationParams(
   // TF_LITE_ENSURE_EQ(context, bias->quantization.type,
   // kTfLiteAffineQuantization);
 
+  printf("yche_test: run PopulateConvolutionQuantizationParams\n");
   // Check data type.
   const auto* affine_quantization =
       reinterpret_cast<TfLiteAffineQuantization*>(filter->quantization.params);
@@ -254,7 +255,7 @@ TfLiteStatus PopulateConvolutionQuantizationParams(
                                           static_cast<double>(output_scale);
     int32_t significand;
     int channel_shift;
-    QuantizeMultiplier(effective_output_scale, &significand, &channel_shift);
+    EVQuantizeMultiplier(effective_output_scale, &significand, &channel_shift);
     per_channel_multiplier[i] = significand;
     per_channel_shift[i] = channel_shift;
   }
@@ -269,8 +270,9 @@ TfLiteStatus PopulateConvolutionQuantizationParams(
         context, input, filter, bias, output, &real_multiplier));
     int exponent;
 
+    printf("yche_test: PopulateConvolutionQuantizationParams run GetQuantizedConvolutionMultipler\n");
     // Populate quantization parameters with multiplier and shift.
-    QuantizeMultiplier(real_multiplier, multiplier, &exponent);
+    EVQuantizeMultiplier(real_multiplier, multiplier, &exponent);
     *shift = -exponent;
   }
   if (input->type == kTfLiteInt8 || input->type == kTfLiteUInt8 ||

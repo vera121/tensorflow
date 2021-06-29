@@ -223,7 +223,6 @@ TfLiteStatus PopulateConvolutionQuantizationParams(
   // TF_LITE_ENSURE_EQ(context, bias->quantization.type,
   // kTfLiteAffineQuantization);
 
-  printf("yche_test: run PopulateConvolutionQuantizationParams\n");
   // Check data type.
   const auto* affine_quantization =
       reinterpret_cast<TfLiteAffineQuantization*>(filter->quantization.params);
@@ -270,7 +269,6 @@ TfLiteStatus PopulateConvolutionQuantizationParams(
         context, input, filter, bias, output, &real_multiplier));
     int exponent;
 
-    printf("yche_test: PopulateConvolutionQuantizationParams run GetQuantizedConvolutionMultipler\n");
     // Populate quantization parameters with multiplier and shift.
     EVQuantizeMultiplier(real_multiplier, multiplier, &exponent);
     *shift = -exponent;

@@ -140,7 +140,6 @@ inline void BiasAndClamp(float clamp_min, float clamp_max, int bias_size,
 
 inline int32_t MultiplyByQuantizedMultiplierSmallerThanOneExp(
     int32_t x, int32_t quantized_multiplier, int left_shift) {
-  printf("yche_test0: using MultiplyByQuantizedMultiplierSmallerThanOneExp\n");
   using gemmlowp::RoundingDivideByPOT;
   using gemmlowp::SaturatingRoundingDoublingHighMul;
   return RoundingDivideByPOT(
@@ -149,7 +148,6 @@ inline int32_t MultiplyByQuantizedMultiplierSmallerThanOneExp(
 
 inline int32_t MultiplyByQuantizedMultiplierGreaterThanOne(
     int32_t x, int32_t quantized_multiplier, int left_shift) {
-  printf("yche_test1: using MultiplyByQuantizedMultiplierGreaterThanOne\n");
   using gemmlowp::SaturatingRoundingDoublingHighMul;
   return SaturatingRoundingDoublingHighMul(x * (1 << left_shift),
                                            quantized_multiplier);
@@ -171,13 +169,13 @@ inline int32_t MultiplyByQuantizedMultiplier(int32_t x,
 
   switch(QR) {
     case R_double_round: {
-  using gemmlowp::RoundingDivideByPOT;
-  using gemmlowp::SaturatingRoundingDoublingHighMul;
-  int left_shift = shift > 0 ? shift : 0;
-  int right_shift = shift > 0 ? 0 : -shift;
-  return RoundingDivideByPOT(SaturatingRoundingDoublingHighMul(
-                                 x * (1 << left_shift), quantized_multiplier),
-                             right_shift);
+	  using gemmlowp::RoundingDivideByPOT;
+	  using gemmlowp::SaturatingRoundingDoublingHighMul;
+	  int left_shift = shift > 0 ? shift : 0;
+	  int right_shift = shift > 0 ? 0 : -shift;
+	  return RoundingDivideByPOT(SaturatingRoundingDoublingHighMul(
+									 x * (1 << left_shift), quantized_multiplier),
+								 right_shift);
     } break;
 
     case R_ev_round: {
@@ -196,7 +194,6 @@ inline int32_t MultiplyByQuantizedMultiplier(int32_t x,
 inline int32_t MultiplyByQuantizedMultiplier(int64_t x,
                                              int32_t quantized_multiplier,
                                              int shift) {
-  printf("yche_test3: using MultiplyByQuantizedMultiplier 64\n");
   // Inputs:
   // - quantized_multiplier has fixed point at bit 31
   // - shift is -31 to +7 (negative for right shift)
@@ -226,7 +223,6 @@ inline int32x4x4_t MultiplyByQuantizedMultiplier4Rows(
   const int left_shift = std::max(shift, 0);
   const int right_shift = std::min(shift, 0);
   int32x4x4_t result;
-  printf("yche_test4: using MultiplyByQuantizedMultiplier4Rows\n");
   int32x4_t multiplier_dup = vdupq_n_s32(quantized_multiplier);
   int32x4_t left_shift_dup = vdupq_n_s32(left_shift);
   int32x4_t right_shift_dup = vdupq_n_s32(right_shift);

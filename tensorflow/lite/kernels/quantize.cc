@@ -132,7 +132,7 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
     const double effective_output_scale =
         static_cast<double>(input->params.scale) /
         static_cast<double>(output->params.scale);
-    QuantizeMultiplier(effective_output_scale, &data->output_multiplier,
+    EVQuantizeMultiplier(effective_output_scale, &data->output_multiplier,
                        &data->output_shift);
   }
 

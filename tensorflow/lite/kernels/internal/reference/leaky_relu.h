@@ -48,12 +48,12 @@ inline void QuantizeLeakyRelu(const LeakyReluParams& params,
     int32_t unclamped_output;
     if (input_value >= 0) {
       unclamped_output = params.output_offset +
-                         MultiplyByQuantizedMultiplier(
+                         TFMultiplyByQuantizedMultiplier(
                              input_value, params.output_multiplier_identity,
                              params.output_shift_identity);
     } else {
       unclamped_output = params.output_offset +
-                         MultiplyByQuantizedMultiplier(
+                         TFMultiplyByQuantizedMultiplier(
                              input_value, params.output_multiplier_alpha,
                              params.output_shift_alpha);
     }
